@@ -1,24 +1,24 @@
-
-
 import socket
-
 import threading
 
-#PORT=4455
-PORT=12021
-SERVER="0.tcp.ngrok.io"
-#SERVER="3.141.142.211"
+import codificadores.hamming as hamming
+
+PORT=45853
+#PORT=12021
+#SERVER="0.tcp.ngrok.io"
+SERVER="192.168.1.79"
 HEADER=8
 FORMAT='utf-8'
-DISCONNECT_MESSAGE="DISCONNECT"
+DISCONNECT_MESSAGE="exit()"
 USERNAME="USERNAME"
 MESSAGE="MSG"
 ERROR="EMPTY_MSG"
 ADDR=(SERVER,PORT)
 
 def lenMsg(msg): # Longitud de texto  
-    message = msg.encode(FORMAT)
-    msg_length = len(message)
+  
+    msg_length = len(msg.encode(FORMAT))
+    #print(f"lenMsg: {msg_length}")
     send_length = str(msg_length).encode(FORMAT)
     send_length += b' ' * (HEADER - len(send_length))
     return send_length
@@ -39,10 +39,14 @@ client.send(username.encode(FORMAT))
 def recvClient():# funcion para recibir los mensajes entrantes del servidor de parte de los usuarios
     msg=client.recv(HEADER)
     msg=msg.decode(FORMAT)
+    #print(f"longitud recibido {msg}")
     if(msg):
         msg_len=int(msg)
         msg=client.recv(msg_len).decode(FORMAT)
-        return msg
+        matrizCadena=hamming.stringMatrizCodificado(msg)
+        detecError=hamming.detectorCorrector(matrizCadena)
+        mensajeRecv=hamming.decodificacionHamming(detecError)
+        return mensajeRecv
     else:
         return ERROR
 
@@ -66,13 +70,26 @@ def recvMessage():# funcion que se mantiene en espera de cualquier mensaje del s
 def sendMessage(): #Funcion de envio de mensajes, esta se mantiene en paralelo con la de escucha para no esperar si no se envia nada o si no se escucha nada del servidor
     estado=True
     while(estado):
-        outMsg=input("--->")
-        client.send(lenMsg(MESSAGE))
-        client.send(MESSAGE.encode(FORMAT))
-        client.send(lenMsg(outMsg))
-        client.send(outMsg.encode(FORMAT))
+        outMsg=input("--->")        
         if(outMsg=="exit()"):
+            print("Desconectando......")
+            client.send(lenMsg(MESSAGE))
+            client.send(MESSAGE.encode(FORMAT))
+            client.send(lenMsg(DISCONNECT_MESSAGE))
+            client.send(DISCONNECT_MESSAGE.encode(FORMAT))
             estado=False
+        elif(outMsg):
+                #--------------hamming------------------
+            mensaje=hamming.codificacion(outMsg)
+            mensaje=hamming.errorTransmision(mensaje)                     
+            stringCadena=hamming.matrizStringCodificado(mensaje)
+            #---------------------------------------
+            client.send(lenMsg(MESSAGE))
+            client.send(MESSAGE.encode(FORMAT))
+            client.send(lenMsg(stringCadena))
+            #print("longitud enviada ", lenMsg(stringCadena))
+            client.send(stringCadena.encode(FORMAT))
+        
     client.shutdown(socket.SHUT_RDWR)
     client.close()
     
@@ -84,7 +101,7 @@ threadRecv.start()
 
 
 sendMessage()
-exit()
+
 
 
 

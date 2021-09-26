@@ -3,19 +3,19 @@ import hamming
 
 while(True):
     #-------------------Hill---------------------------------------------------
-    textoEntrada=cifradoHill.textEntrada()
+    textoEntrada=cifradoHill.textEntrada("Texto de prueba")
     clave=cifradoHill.clave
     claveInv=cifradoHill.claveInv
     diccionarioLongitud=cifradoHill.numeroCaracteres
     textoCifrado=cifradoHill.cifDesHill(clave,textoEntrada,diccionarioLongitud)
-    print('Texto ingresado codificado es:',textoCifrado)#Texto cifrado de hill
+    print('Texto ingresado codificado es: Texto de prueba',textoCifrado)#Texto cifrado de hill
     print('')
 
     #------------------------------------------------------------------------------
 
     #----------------------------Codificación hamming------------------------------
     textoCodificadoDeHamming,textoCadena=hamming.codificacion(textoCifrado)
-    print('Bits de información y pariedad: \n',textoCodificadoDeHamming)
+    print('Bits de información y paridad: \n',textoCodificadoDeHamming)
     print('')
 
     #print(textoCadena)
@@ -36,7 +36,7 @@ while(True):
 
 
     #---------------------------Decodificado sin ruido-------------------------------------------
-    textoDecodificadoDeHamming=hamming.decod(textoCodificadoDeHamming)
+    textoDecodificadoDeHamming=hamming.decodificacionHamming(textoCodificadoDeHamming)
     print('Texto recibido con errores corregidos:',textoDecodificadoDeHamming)
     print('')
     #--------------------------------------------------------------------------------------------
@@ -51,3 +51,4 @@ while(True):
     print('-----------------------------------------------')
     print('')
     print('')
+    input("")

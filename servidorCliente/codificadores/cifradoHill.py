@@ -2,9 +2,9 @@ from sympy import *
 import random as rnd
 
 
-def textEntrada():
+def textEntrada(text):
     try:
-        text = input("Ingrese el texto: ").upper()
+        text = text.upper()#input("Ingrese el texto: ").upper()
         return text
     except:
         print("Texto no valido")
@@ -116,7 +116,7 @@ while(det == 0):  # Obtencion de clave aleatoria para cifrar si el determinante 
 clave=Matrix([[3,4],[2,1]]) #Clave para cifrar
 claveInv = invModN(clave,numeroCaracteres)
 
-estado = True
+#estado = True
 """
 while(estado):
     print("---------------Cifrado/descifrado de hill----------------")

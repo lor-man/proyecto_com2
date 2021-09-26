@@ -1,13 +1,13 @@
 import socket 
 import threading
-
+import codificadores.hamming as hamming
 
 PORT=45853
-#SERVER=socket.gethostbyname(socket.gethostname())
-SERVER="127.0.0.1"
+SERVER=socket.gethostbyname(socket.gethostname())
+#SERVER="127.0.0.1"
 ADDR=(SERVER,PORT)
 FORMAT='utf-8'
-DISCONNECT_MESSAGE="DISCONNECT"
+DISCONNECT_MESSAGE="exit()"
 USERNAME="USERNAME"
 MESSAGE="MSG"
 HEADER=8
@@ -18,8 +18,7 @@ server.bind(ADDR)
 clients=[]
 
 def lenMsg(msg):
-    message = msg.encode(FORMAT)
-    msg_length = len(message)
+    msg_length = len(msg)
     send_length = str(msg_length).encode(FORMAT)
     send_length += b' ' * (HEADER - len(send_length))
     return send_length
@@ -27,11 +26,11 @@ def lenMsg(msg):
 def clientsMessage(msg,connection,username):
     for client in clients:
         if(client!=connection):
-            try:               
-                msgSend="["+str(username)+"]:"+str(msg)
-                client.send(lenMsg(MESSAGE))    
+            try:      
+                msgSend=username+msg #msgSend="["+str(username)+"]:"+msg
+                client.send(lenMsg(MESSAGE.encode(FORMAT)))    
                 client.send(MESSAGE.encode(FORMAT))
-                client.send(lenMsg(msgSend))
+                client.send(lenMsg(msgSend.encode(FORMAT)))
                 client.send(msgSend.encode(FORMAT))
             except:
                 clients.remove(client)
@@ -51,7 +50,7 @@ def handle_client(conn,addr):
         
         msg_length=msg_length.decode(FORMAT)
         
-        
+        #print(msg_length)
 
         if msg_length:
             msg_length=int(msg_length)
@@ -61,21 +60,24 @@ def handle_client(conn,addr):
             #print(f"[RECIBIDO] {msg}")
 
             if(userRegister): #Registra al usuario con un nombre de usuario
-                username=msg
+                username="["+msg+"]:"
+                username=hamming.codificacion(username)
+                username=hamming.errorTransmision(username)
+                username=hamming.matrizStringCodificado(username)
                 userRegister=False 
                 
             if (messageIn):#Muestra el mensaje
-                messageCont=msg               
-                clientsMessage(messageCont,conn,username)
-                
-
-                if(msg=="exit()"):# Desconecta al cliente 
+                messageCont=msg 
+                #print(messageCont)
+                if(messageCont==DISCONNECT_MESSAGE):# Desconecta al cliente 
                     connected=False
-                    disconnectUser=f"Disconnected"
+                    #print("Saliendo")
+                    disconnectUser=hamming.codificacion("Disconnected")
+                    disconnectUser=hamming.errorTransmision(disconnectUser)
+                    disconnectUser=hamming.matrizStringCodificado(disconnectUser)
                     clientsMessage(disconnectUser,conn,username)
-                    
-                    
-
+                else:
+                    clientsMessage(messageCont,conn,username)
                 messageIn=False
 
             if (msg==USERNAME): #El siguiente mensaje indica que sera el apodo escogido por el cliente
@@ -84,9 +86,10 @@ def handle_client(conn,addr):
 
             if (msg==MESSAGE):                
                 messageIn=True
+                #print(messageIn)
                 #print("message"+str(messageIn))
 
-            print(f"[{addr}]{msg}")
+            print(f"[{addr}] Recibido")
             #conn.send("msg received".encode(FORMAT))
         
     clients.remove(conn)  
@@ -100,8 +103,7 @@ def start():
     print(f"[LISTENING] Server is listening on {SERVER}:{PORT}")
     while True:
         conn, addr = server.accept()
-        clients.append(conn)
-        
+        clients.append(conn)        
         thread = threading.Thread(target=handle_client, args=(conn, addr))
         thread.daemon=True
         thread.start()
