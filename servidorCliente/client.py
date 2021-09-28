@@ -1,7 +1,10 @@
 import socket
 import threading
+import random
 
 import codificadores.hamming as hamming
+import codificadores.cesar as cesar
+import codificadores.cifradoHill as hill
 
 PORT=45853
 #PORT=12021
@@ -24,7 +27,6 @@ def lenMsg(msg): # Longitud de texto
     return send_length
 
 
-
 client=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 client.connect(ADDR)
 username=input("Username <---: ")
@@ -34,18 +36,47 @@ client.send(USERNAME.encode(FORMAT))
 client.send(lenUsername)
 client.send(username.encode(FORMAT))
 
+def cifradoRandom(mensaje):
+    cifrador=random.randint(1,2)
+    
+    if(cifrador==1):#hill
+        mensaje="HIL"+hill.cifradoDescifrado(mensaje,0) 
+           
+    elif(cifrador==2):#cesar
+   
+        mensaje="CES"+cesar.cifradoCesar(mensaje)
+    return mensaje
 
+def descifradoRandom(mensaje):
+    
+    usuarioRango=[pos for pos in range(len(mensaje)) if (mensaje[pos]=="[" or mensaje[pos]=="]")]
+    
+    usuario=mensaje[usuarioRango[0]:usuarioRango[1]+1]
+    
+    cifrado=mensaje[usuarioRango[1]+1:usuarioRango[1]+4]
+ 
+    mensajeCifrado=mensaje[usuarioRango[1]+4::]
+    
+    if(cifrado=="HIL"):
+        mensaje=hill.cifradoDescifrado(mensajeCifrado,1)
+    elif(cifrado=="CES"):
+        mensaje=cesar.decifradoCesar(mensajeCifrado)
+    mensaje=usuario+mensaje
+    return mensaje
+
+    
 
 def recvClient():# funcion para recibir los mensajes entrantes del servidor de parte de los usuarios
     msg=client.recv(HEADER)
     msg=msg.decode(FORMAT)
-    #print(f"longitud recibido {msg}")
     if(msg):
         msg_len=int(msg)
         msg=client.recv(msg_len).decode(FORMAT)
-        matrizCadena=hamming.stringMatrizCodificado(msg)
-        detecError=hamming.detectorCorrector(matrizCadena)
-        mensajeRecv=hamming.decodificacionHamming(detecError)
+        #---------------Hamming------------------------
+        mensajeRecv=hamming.hammingDecodificacion(msg)
+        #--------------descifrado----------------------
+        mensajeRecv=descifradoRandom(mensajeRecv)
+        #----------------------------------------------
         return mensajeRecv
     else:
         return ERROR
@@ -63,8 +94,8 @@ def recvMessage():# funcion que se mantiene en espera de cualquier mensaje del s
             if(inMsg==ERROR):
                 print(f"[ERROR] {client}")
             else:
-                print("")
-                print(inMsg)
+                #print("\r")
+                print("\r"+inMsg)
                 print("--->",end='',flush=True)
 
 def sendMessage(): #Funcion de envio de mensajes, esta se mantiene en paralelo con la de escucha para no esperar si no se envia nada o si no se escucha nada del servidor
@@ -79,16 +110,17 @@ def sendMessage(): #Funcion de envio de mensajes, esta se mantiene en paralelo c
             client.send(DISCONNECT_MESSAGE.encode(FORMAT))
             estado=False
         elif(outMsg):
-                #--------------hamming------------------
-            mensaje=hamming.codificacion(outMsg)
-            mensaje=hamming.errorTransmision(mensaje)                     
-            stringCadena=hamming.matrizStringCodificado(mensaje)
+            #--------------Cifrador random--------------------
+           
+            outMsg=cifradoRandom(outMsg)
+            
+            #--------------hamming------------------
+            mensaje=hamming.hammingCodificacion(outMsg)
             #---------------------------------------
             client.send(lenMsg(MESSAGE))
             client.send(MESSAGE.encode(FORMAT))
-            client.send(lenMsg(stringCadena))
-            #print("longitud enviada ", lenMsg(stringCadena))
-            client.send(stringCadena.encode(FORMAT))
+            client.send(lenMsg(mensaje))
+            client.send(mensaje.encode(FORMAT))
         
     client.shutdown(socket.SHUT_RDWR)
     client.close()

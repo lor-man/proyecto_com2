@@ -15,7 +15,6 @@ def matrizStringCodificado(textoMatrizCod):# convierte una matriz de nx16 a un e
 def stringMatrizCodificado(stringCodificado):#Devuelve la matriz de bits de una cadana de caracteres codificada de nx16
     
     intStringCodificado=[ord(charElemento) for charElemento in stringCodificado]
-    #print(intStringCodificado)
     intStringCodificadoMatriz=np.array([[intStringCodificado[posE]for posE in range(pos,pos+2)] for pos in range(0,len(intStringCodificado),2)],dtype=np.uint8)
     stringBinario=np.unpackbits(intStringCodificadoMatriz,axis=1)
     return stringBinario
@@ -24,8 +23,7 @@ def codificacion(textoEntradaHamming):# codificacion hamming de un texto
     hammingArray=None   #Matriz de nx16 en la cual n es el numero total de letras que se ingresan por teclado
     cadenaHamming=np.array([[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],dtype=np.uint8)#array auxiliar donde se almacena la letra a codificar
     try:
-        #textoEntradaHamming=textoEntradaHamming.encode('utf-8') 
-        #print(textoEntradaHamming)      
+          
         if(len(textoEntradaHamming)==0):#Si no se ingresa texto retorna un error
 
             return 1
@@ -46,7 +44,7 @@ def codificacion(textoEntradaHamming):# codificacion hamming de un texto
             cadenaHamming=np.append(cadenaHamming,hammingArray,axis=0)#Se agrega la letra n en la matriz de nx16 donde se guardan las letras con codigo hamming
 
         cadenaHamming=np.delete(cadenaHamming,0,axis=0)# Eliminacion del primer elemento de la matriz de nx16 ya que este elemento solo la inicia 
-        #print(cadenaHamming)
+     
         return cadenaHamming #Retorna la matriz de nx16 donde se encuentran todos los caracteres con codigo hamming y la cadena introducida
     
     except Exception as exc:
@@ -63,12 +61,12 @@ def errorTransmision(mensaje): #mensaje es matriz de nx16 donde n es el array de
         #letrCodHam es el array de la letra n de la matriz nx16
         randPos=np.random.randint(0,30,dtype=np.uint8)#obtiene la posicion aleatoria del error
         if(randPos<=15):
-            #print(f"Posicion con error: {randPos}")
+            
             letraCodHam[randPos]=np.uint8(not(letraCodHam[randPos])) #Se cambia el valor actual del bit en la posicion obtenida
         cadenaHammingError=np.append(cadenaHammingError,[letraCodHam],axis=0)# Se agrega el array del caracter al cual se le agrego el error a la matriz auxiliar 
        
     cadenaHammingError=np.delete(cadenaHammingError,0,axis=0) #Se eliminina la fila 0 de la matriz auxiliar debido a que solo era para inicializar el elemento
-    #print(cadenaHammingError)
+
 
     return cadenaHammingError #Retorno de la matriz con errores introducidos
 
@@ -93,13 +91,11 @@ def detectorCorrector(mensaje): #deteccion y correccion de error
                 
                 mensaje[letraIndex]=letraRecv
                 
-        else:# si la posicion no es 0
-            #print(f"posicion de error {errorPos} en {letraIndex}")        
+        else:# si la posicion no es 0     
             letraRecv[errorPos]=np.uint8(not(letraRecv[errorPos]))
             parityHamming=xorCal(letraRecv[1:])#Calculo de la paridad de los datos del codigo hamming sin contar el primer bit
 
             if(parityHamming!=letraRecv[0]):
-            #   print(f"2 o mas errores en letraRecv[{letraIndex}]")
                 mensaje[letraIndex]=letraRecv
             else:
                 mensaje[letraIndex]=letraRecv
@@ -114,6 +110,18 @@ def decodificacionHamming(mensaje):#Retorna el texto de una matriz de de hamming
         texto=texto+chr(np.packbits(np.array([letra[pos] for pos in range(0,13) if (pos!=0 and pos!=1 and pos!=2 and pos!=4 and pos!=8) ]))[0])
 
     return(texto)
+
+def hammingCodificacion(msg):
+    mensaje=codificacion(msg)
+    mensaje=errorTransmision(mensaje)                     
+    stringCadena=matrizStringCodificado(mensaje)
+    return stringCadena
+
+def hammingDecodificacion(msg):
+    matrizCadena=stringMatrizCodificado(msg)
+    detecError=detectorCorrector(matrizCadena)
+    mensajeRecv=decodificacionHamming(detecError)
+    return mensajeRecv
 
 """
 cadena=codificacion("Prueba")

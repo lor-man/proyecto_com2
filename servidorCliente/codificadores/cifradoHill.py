@@ -2,6 +2,14 @@ from sympy import *
 import random as rnd
 
 
+dic1 = {"A": 0, "B": 1, "C": 2, "D": 3, "E": 4, "F": 5, "G": 6, "H": 7, "I": 8, "J": 9,
+        "K": 10,"L": 11, "M": 12, "N": 13, "Ñ": 14,"O": 15, "P": 16, "Q": 17, "R": 18, "S": 19,
+        "T": 20,"U": 21, "V": 22, "W": 23, "X": 24, "Y": 25, "Z": 26, " ": 27, "?": 28,"1":29,
+        "2":30,"3":31,"4":32,"5":33,"6":34,"7":35,"8":36,"9":37,"0":38}
+
+numeroCaracteres=len(dic1)
+clave=Matrix([[3,4],[2,1]]) #Clave para cifrar
+
 def textEntrada(text):
     try:
         text = text.upper()#input("Ingrese el texto: ").upper()
@@ -10,8 +18,8 @@ def textEntrada(text):
         print("Texto no valido")
         return 0
 
-
 def textCambio(origiText, dic1):#Cambiando valores a numeros
+    #print(f"aca es:{origiText}...{len(origiText)}")
     numText = Matrix()
     parText = []
     cont0 = 0
@@ -20,12 +28,15 @@ def textCambio(origiText, dic1):#Cambiando valores a numeros
         origiText = origiText+" "
     for caracter in origiText:
         try:
+            #print(caracter)
             parText.append(dic1[caracter])
             cont0 += 1
             if(cont0 == 2):
+                #print(f"fila----{cont0}")
                 numText = numText.col_insert(cont1, Matrix(parText))
                 parText = []
                 cont1 += 1
+                #print(f"columna----{cont1}")
                 cont0 = 0
         except:#deteccion de errores caracter no encontrado
             parText.append(dic1[" "])
@@ -35,13 +46,13 @@ def textCambio(origiText, dic1):#Cambiando valores a numeros
                 parText = []
                 cont1 += 1
                 cont0 = 0
-            print("Caracter no encontrado: " +
-                  caracter+" reemplazado por espacio")
+            print(f"Caracter no encontrado:{caracter} reemplazado por espacio")
     return numText
 
 def cifDesHill(clave, texto,detN):
     # Cambio de texto a su equivalente numerico
     textCodificado = textCambio(texto, dic1)
+    #print(texto)
     textCifradoMat = Matrix()
     textaux0 = []
     textCif = ""
@@ -56,22 +67,21 @@ def cifDesHill(clave, texto,detN):
             textaux0.append(reLlave(textCifradoMat.col(colCifrada)[1], dic1))
         for caracter in textaux0:
             textCif = textCif+caracter
-        return textCif
+        return str(textCif)
     except Exception as exc:
         print("No se pudo cifrar el texto")
         print(str(exc))
         return("Err")
 
-
 def reLlave(valor_i, dic):  # recupera la llave del diccionario segun su valor numerico
     try:
+        #print(f"numero({valor_i})")
         for llave, valor in dic.items():
             if(valor_i == valor):
                 return llave
     except:
         print("No se encuentra la llave del valor")
         return " "
-
 
 def invModN(matClave,detN):
     res = 0
@@ -85,7 +95,6 @@ def invModN(matClave,detN):
     matClave = ((matClave.inv()*det)*(x-1)) % detN
     return matClave
 
-
 def claveMatrizGen(detN):  # Generador de matriz clave aleatoria
     clave = Matrix()
     filax = []
@@ -96,28 +105,44 @@ def claveMatrizGen(detN):  # Generador de matriz clave aleatoria
         filax = []
     return clave % detN
 
-dic1 = {"A": 0, "B": 1, "C": 2, "D": 3, "E": 4, "F": 5, "G": 6, "H": 7, "I": 8, "J": 9,
-        "K": 10,"L": 11, "M": 12, "N": 13, "Ñ": 14,"O": 15, "P": 16, "Q": 17, "R": 18, "S": 19,
-        "T": 20,"U": 21, "V": 22, "W": 23, "X": 24, "Y": 25, "Z": 26, " ": 27, "?": 28,"1":29,
-        "2":30,"3":31,"4":32,"5":33,"6":34,"7":35,"8":36,"9":37,"0":38}
-numeroCaracteres=len(dic1)
 
-#det = 0
+def cifradoDescifrado(text,opc):
+    text=textEntrada(text)#Mayusculas
+    #print(f"text...<{text}")
+
+    if(opc==0):#cifrar
+        text=cifDesHill(clave,text,numeroCaracteres)
+        #print(f"cifrado------>{text}")
+    elif(opc==1):#descifrar
+        text=cifDesHill(claveInv,text,numeroCaracteres)
+    return(text)
+
+claveInv = invModN(clave,numeroCaracteres)
 """
+
+
+det = 0
 while(det == 0):  # Obtencion de clave aleatoria para cifrar si el determinante no es 0 es aceptable
     clave = claveMatrizGen(ndet)
     det = clave.det()
-
 """
 # Se obtiene la matriz inversa de la clave en modulo 39
-
-
 #clave=Matrix([[4,8],[2,3]]) #Clave para cifrar
-clave=Matrix([[3,4],[2,1]]) #Clave para cifrar
-claveInv = invModN(clave,numeroCaracteres)
 
-#estado = True
+
+
+#texto=cifradoDescifrado("prueba",0)
+#print(texto)
+
+
+
+
+
+
+
 """
+estado = True
+
 while(estado):
     print("---------------Cifrado/descifrado de hill----------------")
     print(                ****Opciones****

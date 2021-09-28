@@ -49,32 +49,26 @@ def handle_client(conn,addr):
         msg_length=conn.recv(HEADER)    
         
         msg_length=msg_length.decode(FORMAT)
-        
-        #print(msg_length)
-
+    
         if msg_length:
             msg_length=int(msg_length)
             
             msg=conn.recv(msg_length).decode(FORMAT)
             
-            #print(f"[RECIBIDO] {msg}")
-
             if(userRegister): #Registra al usuario con un nombre de usuario
-                username="["+msg+"]:"
-                username=hamming.codificacion(username)
-                username=hamming.errorTransmision(username)
-                username=hamming.matrizStringCodificado(username)
+                username="["+msg+"]"
+
+                username=hamming.hammingCodificacion(username)
+              
                 userRegister=False 
                 
             if (messageIn):#Muestra el mensaje
                 messageCont=msg 
-                #print(messageCont)
                 if(messageCont==DISCONNECT_MESSAGE):# Desconecta al cliente 
                     connected=False
-                    #print("Saliendo")
-                    disconnectUser=hamming.codificacion("Disconnected")
-                    disconnectUser=hamming.errorTransmision(disconnectUser)
-                    disconnectUser=hamming.matrizStringCodificado(disconnectUser)
+
+                    disconnectUser=hamming.hammingCodificacion("Disconnected")
+                    
                     clientsMessage(disconnectUser,conn,username)
                 else:
                     clientsMessage(messageCont,conn,username)
@@ -82,15 +76,11 @@ def handle_client(conn,addr):
 
             if (msg==USERNAME): #El siguiente mensaje indica que sera el apodo escogido por el cliente
                 userRegister=True
-                #print(userRegister)
 
             if (msg==MESSAGE):                
                 messageIn=True
-                #print(messageIn)
-                #print("message"+str(messageIn))
 
             print(f"[{addr}] Recibido")
-            #conn.send("msg received".encode(FORMAT))
         
     clients.remove(conn)  
     conn.shutdown(socket.SHUT_RDWR)
