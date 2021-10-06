@@ -5,6 +5,7 @@ import random
 import codificadores.hamming as hamming
 import codificadores.cesar as cesar
 import codificadores.cifradoHill as hill
+import codificadores.codificacioPropia as codPropio
 
 PORT=45853
 #PORT=12021
@@ -37,14 +38,15 @@ client.send(lenUsername)
 client.send(username.encode(FORMAT))
 
 def cifradoRandom(mensaje):
-    cifrador=random.randint(1,2)
+    cifrador=random.randint(1,3)
     
     if(cifrador==1):#hill
         mensaje="HIL"+hill.cifradoDescifrado(mensaje,0) 
            
-    elif(cifrador==2):#cesar
-   
+    elif(cifrador==2):#cesar   
         mensaje="CES"+cesar.cifradoCesar(mensaje)
+    elif(cifrador==3):#propio
+        mensaje="PRO"+codPropio.codificador(mensaje)
     return mensaje
 
 def descifradoRandom(mensaje):
@@ -52,15 +54,20 @@ def descifradoRandom(mensaje):
     usuarioRango=[pos for pos in range(len(mensaje)) if (mensaje[pos]=="[" or mensaje[pos]=="]")]
     
     usuario=mensaje[usuarioRango[0]:usuarioRango[1]+1]
-    
+
     cifrado=mensaje[usuarioRango[1]+1:usuarioRango[1]+4]
- 
+   
     mensajeCifrado=mensaje[usuarioRango[1]+4::]
     
     if(cifrado=="HIL"):
+      
         mensaje=hill.cifradoDescifrado(mensajeCifrado,1)
     elif(cifrado=="CES"):
+       
         mensaje=cesar.decifradoCesar(mensajeCifrado)
+    elif(cifrado=="PRO"):
+    
+        mensaje=codPropio.decodificador(mensajeCifrado)
     mensaje=usuario+mensaje
     return mensaje
 
