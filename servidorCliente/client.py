@@ -6,6 +6,7 @@ import codificadores.hamming as hamming
 import codificadores.cesar as cesar
 import codificadores.cifradoHill as hill
 import codificadores.codificacioPropia as codPropio
+import codificadores.texto_a_voz as txt2v
 
 PORT=45853
 #PORT=12021
@@ -101,9 +102,10 @@ def recvMessage():# funcion que se mantiene en espera de cualquier mensaje del s
             if(inMsg==ERROR):
                 print(f"[ERROR] {client}")
             else:
-                #print("\r")
+                txt2v.textoAVoz(inMsg)
                 print("\r"+inMsg)
                 print("--->",end='',flush=True)
+                
 
 def sendMessage(): #Funcion de envio de mensajes, esta se mantiene en paralelo con la de escucha para no esperar si no se envia nada o si no se escucha nada del servidor
     estado=True
@@ -140,46 +142,3 @@ threadRecv.start()
 
 
 sendMessage()
-
-
-
-
-
-
-"""
-
-while(True):
-    socket_list=[sys.stdin,client]
-    read_sockets,write_socket,error_socket=select.select(socket_list,[],[])
-    for socks in read_sockets:
-        if (socks==client):
-            cli=socks
-            msg=socks.recv(HEADER)
-            msg=msg.decode(FORMAT)
-            if msg:
-                msg_len=int(msg)
-                msg=client.recv(msg_len).decode(FORMAT)
-                if(msg==MESSAGE):
-                    inMsg=recvClient(cli)
-                    if(inMsg==ERROR):
-                        print(f"[ERROR] {client}")
-                    else:
-                        print(inMsg)
-        else:
-            outMsg=input("--->")
-            if(outMsg=="exit_"):
-                client.send(lenMsg(DISCONNECT_MESSAGE))
-                client.send(DISCONNECT_MESSAGE.encode(FORMAT))
-            client.send(lenMsg(MESSAGE))
-            client.send(MESSAGE.encode(FORMAT))
-            client.send(lenMsg(outMsg))
-            client.send(outMsg.encode(FORMAT))
-
-
-"""
-    
-
-            
-            
-                    
-                    
