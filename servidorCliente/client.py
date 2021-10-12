@@ -11,7 +11,7 @@ import codificadores.texto_a_voz as txt2v
 PORT=45853
 #PORT=12021
 #SERVER="0.tcp.ngrok.io"
-SERVER="192.168.1.79"
+SERVER="25.76.141.131"
 HEADER=8
 FORMAT='utf-8'
 DISCONNECT_MESSAGE="exit()"

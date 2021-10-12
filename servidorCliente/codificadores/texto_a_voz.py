@@ -2,15 +2,15 @@ from gtts import gTTS
 #from playsound import playsound
 import pygame
 import pathlib
-from datetime import datetime
+#from datetime import datetime
 from mutagen.mp3 import MP3
 
 def mp3Path():
     path=str(pathlib.Path(__file__).parent.resolve())
     path=path.replace("\\","/")
 
-    fechaHora=datetime.now()
-    dt_string=fechaHora.strftime("%d-%m-%Y")
+    #fechaHora=datetime.now()
+    #dt_string=fechaHora.strftime("%d-%m-%Y")
 
     #path=path+"/"+dt_string+".mp3"
     
