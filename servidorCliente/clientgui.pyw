@@ -14,10 +14,10 @@ from tkinter import ttk
 
 
 #---------------------------------------------------------
-#PORT=45853
-PORT=16914
-SERVER="8.tcp.ngrok.io"
-#SERVER="192.168.1.79"
+PORT=45853
+#PORT=16914
+#SERVER="8.tcp.ngrok.io"
+SERVER="192.168.1.79"
 HEADER=8
 FORMAT='utf-8'
 DISCONNECT_MESSAGE="exit()"
@@ -36,29 +36,41 @@ class clientGui():
     def __init__(self):
 
         self.chatGui=Tk()
+        
         self.chatGui.withdraw()
-        self.client=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-        self.client.connect(ADDR)
+        
 
-        #ventana de ingreso de nombre de usuario
+        #ventana de ingreso de nombre de usuario-----------------------------------------------------------------------
 
         self.login=Toplevel()
         self.login.title("Login")
         self.login.resizable(width=False,height=False)
         self.login.configure(width=400,height=300)
+        self.login.configure(bg="gray14")
+        self.login.iconbitmap('icono3.ico')
+     
         self.pls=Label(self.login,text="Ingresa el nombre de usuario",justify=CENTER)
-        self.pls.place(relheight=0.15,relx=0.2,rely=0.07)
+        self.pls.configure(bg="gray14",fg="white")
+        self.pls.grid(row=1,column=1,columnspan=2,padx=20,pady=20)
+
         self.labelNombre=Label(self.login,text="Nombre: ")
-        self.labelNombre.place(relheight=0.2,relx=0.1,rely=0.2)
+        self.labelNombre.configure(bg="gray14",fg="white")
+        self.labelNombre.grid(row=2,column=1,padx=20,pady=20)
 
         self.entryNombre=Entry(self.login)
-        self.entryNombre.place(relheight=0.12,relwidth=0.4,relx=0.35,rely=0.2)
-
+        self.entryNombre.grid(row=2,column=2,padx=20,pady=20)
+        self.entryNombre.configure(bg="gray20",fg="white")
         self.entryNombre.focus()
+
         self.siguienteVentana=Button(self.login,text="Continuar",command= lambda:self.siguiente(self.entryNombre.get()))
-        self.siguienteVentana.place(relx=0.4,rely=0.55)
+        self.siguienteVentana.configure(bg="gray20",fg="white")
+        self.siguienteVentana.grid(row=3,column=1,columnspan=2,sticky="nswe")
+        
+
+        #------------------------------------------------------------------------------------------------------------------
         self.login.bind('<Return>',self.funcLogin)
         self.chatGui.protocol("WM_DELETE_WINDOW",self.cerrarVentana)
+        #txt2v.textoAVoz("Bienvenido, despues de esuchar el siguiente mensaje ingrese el nombre de usuario y luego presione la tecla Enter")
         self.chatGui.mainloop()
 
     
@@ -73,9 +85,13 @@ class clientGui():
         self.threadRecv.start()
         #self.threadRecv.join()
 
+   
+
 
     def chat(self,nombre):
         self.nombre=nombre
+        self.client=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+        self.client.connect(ADDR)
         self.chatGui.bind('<Return>',self.funcChat)
         self.chatGui.resizable(False,False)
 
@@ -86,6 +102,7 @@ class clientGui():
 
         self.chatGui.deiconify()
         self.chatGui.title(f"Usuario: {self.nombre}")
+        self.chatGui.iconbitmap('icono3.ico')
         
         self.chatGui.configure(bg="black")
         
@@ -109,9 +126,11 @@ class clientGui():
 
     def funcChat(self,event):#Cuando se presiona enter procesa el nombre de usuario en la pantalla de login
         self.sendBoton(self.textEntrada.get())
+        return
 
     def funcLogin(self,event):#Envia el mensaje cada vez que se presiona enter     
         self.siguiente(self.entryNombre.get())
+        return
 
     def lenMsg(self,msg):
         msg_length = len(msg.encode(FORMAT))
@@ -207,41 +226,41 @@ class clientGui():
     def sendMessage(self):
         self.text.config(state='disabled')
         outMsg=self.msg
-        while(True):
-            if(outMsg=="exit()"):
-                print("Desconectando......")
-                self.client.send(self.lenMsg(MESSAGE))
-                self.client.send(MESSAGE.encode(FORMAT))
-                self.client.send(self.lenMsg(DISCONNECT_MESSAGE))
-                self.client.send(DISCONNECT_MESSAGE.encode(FORMAT))
+        try:
+            while(True):
+                if(outMsg=="exit()"):
+                    print("Desconectando......")
+                    self.client.send(self.lenMsg(MESSAGE))
+                    self.client.send(MESSAGE.encode(FORMAT))
+                    self.client.send(self.lenMsg(DISCONNECT_MESSAGE))
+                    self.client.send(DISCONNECT_MESSAGE.encode(FORMAT))
 
-                self.cerrarVentana()
+                    self.cerrarVentana()
 
-            elif(outMsg!="exit()"):
-                #-------------Impresion en gui--------------------
-                self.text.config(state='normal')
-                self.text.insert(END,f"----> {outMsg}"+"\n\n")
-                self.text.config(state='disabled')
-                self.text.see(END)
+                elif(outMsg!="exit()"):
+                    #-------------Impresion en gui--------------------
+                    self.text.config(state='normal')
+                    self.text.insert(END,f"----> {outMsg}"+"\n\n")
+                    self.text.config(state='disabled')
+                    self.text.see(END)
 
-                #--------------Cifrador random--------------------
-                outMsg=self.cifradoRandom(outMsg)
-                #--------------hamming------------------
-                mensaje=hamming.hammingCodificacion(outMsg)
-                #---------------------------------------
-                self.client.send(self.lenMsg(MESSAGE))
-                self.client.send(MESSAGE.encode(FORMAT))
-                self.client.send(self.lenMsg(mensaje))
-                self.client.send(mensaje.encode(FORMAT))
-            break
-    
+                    #--------------Cifrador random--------------------
+                    outMsg=self.cifradoRandom(outMsg)
+                    #--------------hamming------------------
+                    mensaje=hamming.hammingCodificacion(outMsg)
+                    #---------------------------------------
+                    self.client.send(self.lenMsg(MESSAGE))
+                    self.client.send(MESSAGE.encode(FORMAT))
+                    self.client.send(self.lenMsg(mensaje))
+                    self.client.send(mensaje.encode(FORMAT))
+                break
+        except:
+            self.cerrarVentana()
+
     def cerrarVentana(self):
         try:
-            #if self.threadRecv.is_alive():
-            #    print(f"threadRecv is alive, but not for long........")
-                #self.threadRecv.stop()
-                #self.threadRecv.join()
-            #self.sendThread.stop()
+            
+            print(type(self.client))
             self.client.shutdown(socket.SHUT_RDWR)
             self.client.close()
             print("Saliendo")

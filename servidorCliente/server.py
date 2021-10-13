@@ -3,8 +3,8 @@ import threading
 import codificadores.hamming as hamming
 
 PORT=45853
-#SERVER=socket.gethostbyname(socket.gethostname())
-SERVER="127.0.0.1"
+SERVER=socket.gethostbyname(socket.gethostname())
+#SERVER="127.0.0.1"
 ADDR=(SERVER,PORT)
 FORMAT='utf-8'
 DISCONNECT_MESSAGE="exit()"
@@ -67,7 +67,7 @@ def handle_client(conn,addr):
                     if(messageCont==DISCONNECT_MESSAGE):# Desconecta al cliente 
                         connected=False
 
-                        disconnectUser=hamming.hammingCodificacion("Disconnected")
+                        disconnectUser=hamming.hammingCodificacion("Desconectado")
                         
                         clientsMessage(disconnectUser,conn,username)
                     else:
@@ -94,8 +94,11 @@ def handle_client(conn,addr):
 def start():
     server.listen()
     print(f"[LISTENING] Server is listening on {SERVER}:{PORT}")
+    
     while True:
+        
         conn, addr = server.accept()
+        #conn.settimeout(20.0)
         clients.append(conn)        
         thread = threading.Thread(target=handle_client, args=(conn, addr))
         thread.daemon=True
@@ -105,3 +108,5 @@ def start():
 
 print("[STARTING] server is starting...")
 start()
+
+
