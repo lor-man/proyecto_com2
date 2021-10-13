@@ -3,8 +3,8 @@ import threading
 import codificadores.hamming as hamming
 
 PORT=45853
-SERVER=socket.gethostbyname(socket.gethostname())
-#SERVER="127.0.0.1"
+#SERVER=socket.gethostbyname(socket.gethostname())
+SERVER="127.0.0.1"
 ADDR=(SERVER,PORT)
 FORMAT='utf-8'
 DISCONNECT_MESSAGE="exit()"

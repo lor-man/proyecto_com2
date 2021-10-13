@@ -14,10 +14,10 @@ from tkinter import ttk
 
 
 #---------------------------------------------------------
-PORT=45853
-#PORT=12021
-SERVER="0.tcp.ngrok.io"
-SERVER="192.168.1.79"
+#PORT=45853
+PORT=16914
+SERVER="8.tcp.ngrok.io"
+#SERVER="192.168.1.79"
 HEADER=8
 FORMAT='utf-8'
 DISCONNECT_MESSAGE="exit()"
@@ -77,6 +77,7 @@ class clientGui():
     def chat(self,nombre):
         self.nombre=nombre
         self.chatGui.bind('<Return>',self.funcChat)
+        self.chatGui.resizable(False,False)
 
         self.client.send(self.lenMsg(USERNAME))
         self.client.send(USERNAME.encode(FORMAT))
@@ -85,17 +86,16 @@ class clientGui():
 
         self.chatGui.deiconify()
         self.chatGui.title(f"Usuario: {self.nombre}")
-        self.chatGui.resizable(width=False,height=False)
         
         self.chatGui.configure(bg="black")
-        self.chatGui.resizable(False,False)
         
-        #self.chatGui.grid(row=1,column=1)
-
         self.textEntrada=StringVar()
 
 
-        self.entradaTexto=Entry(self.chatGui,textvariable=self.textEntrada,width=50,bg="gray13",fg="white").grid(row=2,column=1)
+        self.entradaTexto=Entry(self.chatGui,textvariable=self.textEntrada,width=50,bg="gray13",fg="white")
+        self.entradaTexto.grid(row=2,column=1)
+        self.entradaTexto.focus()
+  
         self.botonEnviar=Button(self.chatGui,text="Enviar",width=15,bg="gray14",fg="black",command=lambda: self.sendBoton(self.textEntrada.get()))
         self.botonEnviar.grid(row=2,column=2,columnspan=2)
       
@@ -242,8 +242,8 @@ class clientGui():
                 #self.threadRecv.stop()
                 #self.threadRecv.join()
             #self.sendThread.stop()
-            #client.shutdown(socket.SHUT_RDWR)
-            #client.close()
+            self.client.shutdown(socket.SHUT_RDWR)
+            self.client.close()
             print("Saliendo")
             self.chatGui.destroy()
             
