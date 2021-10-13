@@ -45,42 +45,45 @@ def handle_client(conn,addr):
     messageCont=None
     connected= True
     while(connected):
-    
-        msg_length=conn.recv(HEADER)    
+        try:
+            msg_length=conn.recv(HEADER)    
+            
+            msg_length=msg_length.decode(FORMAT)
         
-        msg_length=msg_length.decode(FORMAT)
-    
-        if msg_length:
-            msg_length=int(msg_length)
-            
-            msg=conn.recv(msg_length).decode(FORMAT)
-            
-            if(userRegister): #Registra al usuario con un nombre de usuario
-                username="["+msg+"]"
-
-                username=hamming.hammingCodificacion(username)
-              
-                userRegister=False 
+            if msg_length:
+                msg_length=int(msg_length)
                 
-            if (messageIn):#Muestra el mensaje
-                messageCont=msg 
-                if(messageCont==DISCONNECT_MESSAGE):# Desconecta al cliente 
-                    connected=False
+                msg=conn.recv(msg_length).decode(FORMAT)
+                
+                if(userRegister): #Registra al usuario con un nombre de usuario
+                    username="["+msg+"]"
 
-                    disconnectUser=hamming.hammingCodificacion("Disconnected")
+                    username=hamming.hammingCodificacion(username)
+                
+                    userRegister=False 
                     
-                    clientsMessage(disconnectUser,conn,username)
-                else:
-                    clientsMessage(messageCont,conn,username)
-                messageIn=False
+                if (messageIn):#Muestra el mensaje
+                    messageCont=msg 
+                    if(messageCont==DISCONNECT_MESSAGE):# Desconecta al cliente 
+                        connected=False
 
-            if (msg==USERNAME): #El siguiente mensaje indica que sera el apodo escogido por el cliente
-                userRegister=True
+                        disconnectUser=hamming.hammingCodificacion("Disconnected")
+                        
+                        clientsMessage(disconnectUser,conn,username)
+                    else:
+                        clientsMessage(messageCont,conn,username)
+                    messageIn=False
 
-            if (msg==MESSAGE):                
-                messageIn=True
+                if (msg==USERNAME): #El siguiente mensaje indica que sera el apodo escogido por el cliente
+                    userRegister=True
 
-            print(f"[{addr}] Recibido")
+                if (msg==MESSAGE):                
+                    messageIn=True
+
+                print(f"[{addr}] Recibido")
+        except:
+            #clients.remove(conn)
+            break
         
     clients.remove(conn)  
     conn.shutdown(socket.SHUT_RDWR)

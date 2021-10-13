@@ -23,7 +23,7 @@ ADDR=(SERVER,PORT)
 def lenMsg(msg): # Longitud de texto  
   
     msg_length = len(msg.encode(FORMAT))
-    #print(f"lenMsg: {msg_length}")
+    
     send_length = str(msg_length).encode(FORMAT)
     send_length += b' ' * (HEADER - len(send_length))
     return send_length
@@ -72,7 +72,6 @@ def descifradoRandom(mensaje):
     mensaje=usuario+mensaje
     return mensaje
 
-    
 
 def recvClient():# funcion para recibir los mensajes entrantes del servidor de parte de los usuarios
     msg=client.recv(HEADER)
