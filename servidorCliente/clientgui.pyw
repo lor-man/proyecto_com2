@@ -14,10 +14,10 @@ from tkinter import ttk
 
 
 #---------------------------------------------------------
-PORT=45853
-#PORT=16914
-#SERVER="8.tcp.ngrok.io"
-SERVER="192.168.1.79"
+#PORT=45853
+PORT=17325
+SERVER="0.tcp.ngrok.io"
+#SERVER="192.168.1.79"
 HEADER=8
 FORMAT='utf-8'
 DISCONNECT_MESSAGE="exit()"
